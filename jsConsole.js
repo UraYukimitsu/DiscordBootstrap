@@ -130,10 +130,6 @@ window.tearDownJS = function () {
 	if (window._scriptTag !== null) {
 		window._scriptTag.innerHTML = "";
 	}
-	if (window._jsWatcher !== null) {
-		window._jsWatcher.close();
-		window._jsWatcher = null;
-	}
 };
 
 window.applyJS = function (path) {
@@ -162,6 +158,8 @@ mainWindow.webContents.on('dom-ready', function () {
 		entireThing = entireThing.replace("mainWindow.webContents.on('dom-ready', function () {});", reloadScript);
 	else if(entireThing.match(reloadScript) === null)
 		entireThing = entireThing.replace("mainWindow.webContents.on", reloadScript + '\nmainWindow.webContents.on');
+	if(args.fixCORS && entireThing.match("webSecurity: false, blinkFeatures: '") === null)
+		entireThing = entireThing.replace("blinkFeatures: '", "webSecurity: false, blinkFeatures: '");
 
 	fs.writeFileSync('./core/app/mainScreen.js', entireThing, {encoding: 'utf8'});
 
