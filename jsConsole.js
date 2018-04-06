@@ -1,7 +1,41 @@
+if(typeof fs === 'undefined')
+	fs = undefined;
+if(typeof path === 'undefined')
+	path = undefined;
+var reqFs = function()
+{
+	if(typeof fs == 'undefined' || typeof path == 'undefined')
+		try{
+			fs = require('fs');
+			path = require('path');
+		} catch (_) { //If !require
+			for(i in global){
+				if(!i.startsWith('temp'))
+					continue;
+				if(typeof global[i][0] == 'object')
+				{
+					if(global[i][0].type !== 'closure')
+						continue;
+					if(typeof global[i][0].object.fs != 'undefined')
+						fs = global[i][0].object.fs;
+					if(typeof global[i][0].object.path != 'undefined')
+						path = global[i][0].object.path;
+				}
+			}
+		}
+	if(typeof fs == 'undefined' || typeof path == 'undefined')
+	{
+		console.clear();
+		console.log('%cClick on ▶ on the entry below, then right click on [[Scopes]] and click on "Store as global variable"\nThis script cannot run otherwise.', 'font-size: 250%; color: red;')
+		console.dir(DiscordNative.fileManager.openFiles);
+		return false;
+	}
+	return true;
+}
 var BD = function(args)
 {
-	const fs = require('fs');
-	const path = require('path');
+	if(!reqFs()) return;
+	function restart() {autoUpdate.hasNativeUpdate = true; autoUpdate.quitAndInstall();}
 
 	function copyDir(src, dest)
 	{
@@ -47,25 +81,29 @@ var BD = function(args)
 		}
 	}
 
-	process.chdir(path.dirname(require.resolve('discord_desktop_core')));
+	var cwd;
+	try{cwd = path.dirname(require.resolve('discord_desktop_core'))} catch(_) {
+		try{DiscordNative.ipc.on()} catch(e) {
+			cwd = path.dirname(e.stack.slice(e.stack.indexOf('at Object.on') + 14).split('app')[0].slice(0,-1));
+		}
+	}
 	if(args.css)
 		args.css = path.resolve(args.css);
 	else
-		args.css = path.resolve('./discord-custom.css');
+		args.css = path.resolve(cwd + '/discord-custom.css');
 
 	if(args.js)
 		args.js = path.resolve(args.js);
 	else
-		args.js = path.resolve('./discord-custom.js');
+		args.js = path.resolve(cwd + '/discord-custom.js');
 
 	if(args.revert)
 	{
-		//rmDir('./core');
-		fs.writeFileSync('./index.js', "module.exports = require('./core.asar');");
-		setTimeout(function(){process.kill(process.pid);}, 1000);
+		fs.writeFileSync(cwd + '/index.js', "module.exports = require('./core.asar');");
+		restart();
 		return;
 	}
-	copyDir('./core.asar', './core');
+	copyDir(cwd + '/core.asar', cwd + '/core');
 	if(!fs.existsSync(args.css))
 		fs.writeFileSync(args.css, '/* put your custom css here. */\n', {encoding: 'utf8'});
 	if(!fs.existsSync(args.js))
@@ -139,12 +177,13 @@ window.applyJS = function (path) {
 
 window.applyJS('${args.js.replace(/\\/g, '\\\\')}');
 window.BD = ${BD.toString()}
+window.reqFs = ${reqFs.toString()}
 `;
 	if(args.node)
 		injectionScript += `module.paths.push('${path.resolve(args.node).replace(/\\/g, '\\\\')}')`;
 	
-	fs.writeFileSync('./codeInjection.js', injectionScript, {encoding: 'utf8'});
-	injPath = path.resolve('./codeInjection.js').replace(/\\/g, '\\\\');
+	fs.writeFileSync(cwd + '/codeInjection.js', injectionScript, {encoding: 'utf8'});
+	injPath = path.resolve(cwd + '/codeInjection.js').replace(/\\/g, '\\\\');
 	reloadScript = `//BeautifulDiscord injection start
 mainWindow.webContents.on('dom-ready', function () {
 	mainWindow.webContents.executeJavaScript(
@@ -152,7 +191,7 @@ mainWindow.webContents.on('dom-ready', function () {
 	);
 });
 //BeautifulDiscord injection end`;
-	var entireThing = fs.readFileSync('./core/app/mainScreen.js', 'utf8');
+	var entireThing = fs.readFileSync(cwd + '/core/app/mainScreen.js', 'utf8');
 
 	if(entireThing.match("mainWindow.webContents.on('dom-ready', function () {});") !== null)
 		entireThing = entireThing.replace("mainWindow.webContents.on('dom-ready', function () {});", reloadScript);
@@ -160,9 +199,12 @@ mainWindow.webContents.on('dom-ready', function () {
 		entireThing = entireThing.replace("mainWindow.webContents.on", reloadScript + '\nmainWindow.webContents.on');
 	if(args.fixCORS && entireThing.match("webSecurity: false, blinkFeatures: '") === null)
 		entireThing = entireThing.replace("blinkFeatures: '", "webSecurity: false, blinkFeatures: '");
+	entireThing = entireThing.replace('nodeIntegration: false', 'nodeIntegration: true');
 
-	fs.writeFileSync('./core/app/mainScreen.js', entireThing, {encoding: 'utf8'});
+	fs.writeFileSync(cwd + '/core/app/mainScreen.js', entireThing, {encoding: 'utf8'});
 
-	fs.writeFileSync('./index.js', "module.exports = require('./core/app/index.js');");
-	process.kill(process.pid);
+	fs.writeFileSync(cwd + '/index.js', "module.exports = require('./core/app/index.js');");
+	console.log(entireThing);
+	restart();
 };
+reqFs();
