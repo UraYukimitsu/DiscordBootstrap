@@ -9,6 +9,7 @@ From your Discord client, open the JS console (Ctrl+Shift+I - or Cmd+Shift+I on 
 contents of `jsConsole.js` and press Enter.
 
 ### An additional step may be required depending on your version of Discord - instructions will appear on-sceen if needed.
+### Make sure your JS console is logging *ALL* messages if that additional step is required.
 
 After that, you can load CSS and JS into your Discord client easily with a command like
 `BD({css: '/absolute/path/to/theme.css', js:'/absolute/path/to/script.js', node:'/absolute/path/to/node_modules'})`
