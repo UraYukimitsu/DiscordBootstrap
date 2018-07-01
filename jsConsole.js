@@ -26,7 +26,7 @@ var reqFs = function()
 	if(typeof fs == 'undefined' || typeof path == 'undefined')
 	{
 		console.clear();
-		console.log('%cClick on ▶ on the entry below, then right click on [[Scopes]] and click on "Store as global variable"\nThis script cannot run otherwise.', 'font-size: 250%; color: red;')
+		console.error('%cClick on ▶ on the entry below, then RIGHT click on [[Scopes]] and click on "Store as global variable"\nThis script cannot run otherwise.', 'font-size: 250%; color: red;')
 		console.dir(DiscordNative.fileManager.openFiles);
 		return false;
 	}
