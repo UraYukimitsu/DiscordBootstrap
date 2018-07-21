@@ -111,12 +111,9 @@ var BD = function(args)
 
 	injectionScript = `
 window._fs = require("fs");
-
 window._cssWatcher = null;
 window._styleTag = null;
-
 window._scriptTag = null;
-
 window.setupCSS = function (path) {
 	var customCSS = window._fs.readFileSync(path, "utf8");
 	if (window._styleTag === null) {
@@ -137,7 +134,6 @@ window.setupCSS = function (path) {
 		);
 	}
 };
-
 window.tearDownCSS = function () {
 	if (window._styleTag !== null) {
 		window._styleTag.innerHTML = "";
@@ -147,34 +143,30 @@ window.tearDownCSS = function () {
 		window._cssWatcher = null;
 	}
 };
-
 window.applyAndWatchCSS = function (path) {
 	window.tearDownCSS();
 	window.setupCSS(path);
 };
-
 window.applyAndWatchCSS('${args.css.replace(/\\/g, '\\\\')}');
-
 window.setupJS = function (path) {
 	var customJS = window._fs.readFileSync(path, "utf8");
-	if (window._scriptTag === null) {
-		window._scriptTag = document.createElement("script");
-		document.head.appendChild(window._scriptTag);
-	}
-	window._scriptTag.innerHTML = customJS;
+	window._script = eval('()=>{'+customJS+'}');
+	var {webFrame} = require('electron');
+	window.eval = webFrame.executeJavaScript;
+	webFrame.registerURLSchemeAsBypassingCSP('https');
+	webFrame.registerURLSchemeAsBypassingCSP('data');
+	webFrame.registerURLSchemeAsBypassingCSP('http');
+	window._script();
 };
-
 window.tearDownJS = function () {
-	if (window._scriptTag !== null) {
-		window._scriptTag.innerHTML = "";
+	if (window._script !== null) {
+		window._script = "";
 	}
 };
-
 window.applyJS = function (path) {
 	window.tearDownJS();
 	window.setupJS(path);
 };
-
 window.applyJS('${args.js.replace(/\\/g, '\\\\')}');
 window.BD = ${BD.toString()}
 window.reqFs = ${reqFs.toString()}
