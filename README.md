@@ -8,7 +8,7 @@ From your Discord client, open the JS console (Ctrl+Shift+I - or Cmd+Shift+I on 
 `Console` tab. You'll be met with a warning telling you that you have a 110% chance I'm scamming you. Here, paste the
 contents of `jsConsole.js` and press Enter.
 
-### An additional step may be required depending on your version of Discord - instructions will appear on-sceen if needed.
+### An additional step may be required depending on your version of Discord - instructions will appear on-screen if needed.
 ### Make sure your JS console is logging *ALL* messages if that additional step is required.
 
 After that, you can load CSS and JS into your Discord client easily with a command like
