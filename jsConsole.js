@@ -35,7 +35,7 @@ var reqFs = function()
 var BD = function(args)
 {
 	if(!reqFs()) return;
-	function restart() {autoUpdate.hasNativeUpdate = true; autoUpdate.quitAndInstall();}
+	restart = reloadElectronApp;
 
 	function copyDir(src, dest)
 	{
