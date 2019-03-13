@@ -147,14 +147,9 @@ window.applyAndWatchCSS = function (path) {
 	window.tearDownCSS();
 	window.setupCSS(path);
 };
-window.applyAndWatchCSS('${args.css.replace(/\\/g, '\\\\')}');
 window.setupJS = function (path) {
 	var customJS = window._fs.readFileSync(path, "utf8");
 	window._script = eval('()=>{'+customJS+'}');
-	var {webFrame} = require('electron');
-	webFrame.registerURLSchemeAsBypassingCSP('https');
-	webFrame.registerURLSchemeAsBypassingCSP('data');
-	webFrame.registerURLSchemeAsBypassingCSP('http');
 	window._script();
 };
 window.tearDownJS = function () {
@@ -166,6 +161,11 @@ window.applyJS = function (path) {
 	window.tearDownJS();
 	window.setupJS(path);
 };
+var {webFrame} = require('electron');
+webFrame.registerURLSchemeAsBypassingCSP('https');
+webFrame.registerURLSchemeAsBypassingCSP('data');
+webFrame.registerURLSchemeAsBypassingCSP('http');
+window.applyAndWatchCSS('${args.css.replace(/\\/g, '\\\\')}');
 window.applyJS('${args.js.replace(/\\/g, '\\\\')}');
 window.BD = ${BD.toString()}
 window.reqFs = ${reqFs.toString()}
