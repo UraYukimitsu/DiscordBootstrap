@@ -152,7 +152,6 @@ window.setupJS = function (path) {
 	var customJS = window._fs.readFileSync(path, "utf8");
 	window._script = eval('()=>{'+customJS+'}');
 	var {webFrame} = require('electron');
-	window.eval = webFrame.executeJavaScript;
 	webFrame.registerURLSchemeAsBypassingCSP('https');
 	webFrame.registerURLSchemeAsBypassingCSP('data');
 	webFrame.registerURLSchemeAsBypassingCSP('http');
