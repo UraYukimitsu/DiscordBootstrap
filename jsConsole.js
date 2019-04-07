@@ -14,8 +14,6 @@ var reqFs = function()
 					continue;
 				if(typeof global[i][0] == 'object')
 				{
-					if(global[i][0].type !== 'closure')
-						continue;
 					if(typeof global[i][0].object.fs != 'undefined')
 						fs = global[i][0].object.fs;
 					if(typeof global[i][0].object.path != 'undefined')
