@@ -2,12 +2,15 @@ if(typeof fs === 'undefined')
 	fs = undefined;
 if(typeof path === 'undefined')
 	path = undefined;
+if(typeof ofs === 'undefined')
+	ofs = undefined;
 var reqFs = function()
 {
-	if(typeof fs == 'undefined' || typeof path == 'undefined')
+	if(typeof fs == 'undefined' || typeof path == 'undefined' || typeof ofs == 'undefined')
 		try{
 			fs = require('fs');
 			path = require('path');
+			ofs = require('original-fs');
 		} catch (_) { //If !require
 			for(i in global){
 				if(!i.startsWith('temp'))
@@ -18,6 +21,8 @@ var reqFs = function()
 						fs = global[i][0].object.fs;
 					if(typeof global[i][0].object.path != 'undefined')
 						path = global[i][0].object.path;
+					if(typeof global[i][0].object.originalFs != 'undefined')
+						ofs = global[i][0].object.originalFs;
 				}
 			}
 		}
@@ -159,10 +164,6 @@ window.applyJS = function (path) {
 	window.tearDownJS();
 	window.setupJS(path);
 };
-var {webFrame} = require('electron');
-webFrame.registerURLSchemeAsBypassingCSP('https');
-webFrame.registerURLSchemeAsBypassingCSP('data');
-webFrame.registerURLSchemeAsBypassingCSP('http');
 window.applyAndWatchCSS('${args.css.replace(/\\/g, '\\\\')}');
 window.applyJS('${args.js.replace(/\\/g, '\\\\')}');
 window.BD = ${BD.toString()}
@@ -186,14 +187,31 @@ mainWindow.webContents.on('dom-ready', function () {
 		entireThing = entireThing.replace("mainWindow.webContents.on('dom-ready', function () {});", reloadScript);
 	else if(entireThing.match(reloadScript) === null)
 		entireThing = entireThing.replace("mainWindow.webContents.on", reloadScript + '\nmainWindow.webContents.on');
-	if(args.fixCORS && entireThing.match("webSecurity: false, blinkFeatures: '") === null)
+	if(args.fixCORS && entireThing.match("webSecurity: false, blinkFeatures: '") === null) {
 		entireThing = entireThing.replace("blinkFeatures: '", "webSecurity: false, blinkFeatures: '");
+		var bootstrap = fs.readFileSync(path.join(DiscordNative.process.remote.resourcesPath, "app.asar", "app_bootstrap", "bootstrap.js"), 'utf-8');
+		bslen = bootstrap.length;
+		obs = bootstrap;
+		bootstrap = bootstrap.replace("const { app, Menu } = require('electron');", `const { app, Menu, protocol } = require('electron');
+		protocol.registerSchemesAsPrivileged([
+			{ scheme: 'data', privileges: { bypassCSP: true } },
+			{ scheme: 'file', privileges: { bypassCSP: true } },
+			{ scheme: 'https', privileges: { bypassCSP: true } },
+			{ scheme: 'http', privileges: { bypassCSP: true } }
+		]);`);
+		while(bootstrap.length > bslen)
+			bootstrap = bootstrap.replace(/\/\/(.+)\n/, "")
+		bootstrap = bootstrap.padEnd(bslen);
+		appAsar = ofs.readFileSync(path.join(DiscordNative.process.remote.resourcesPath, "app.asar"));
+		appAsar.write(bootstrap, appAsar.indexOf(obs))
+		ofs.writeFileSync(path.join(DiscordNative.process.remote.resourcesPath, "app.asar"), appAsar);
+	}
 	entireThing = entireThing.replace('nodeIntegration: false', 'nodeIntegration: true');
 
 	fs.writeFileSync(cwd + '/core/app/mainScreen.js', entireThing, {encoding: 'utf8'});
 
 	fs.writeFileSync(cwd + '/index.js', "module.exports = require('./core/app/index.js');");
-	console.log(entireThing);
+	
 	restart();
 };
 reqFs();
