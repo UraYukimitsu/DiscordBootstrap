@@ -6,6 +6,8 @@ if(typeof ofs === 'undefined')
 	ofs = undefined;
 var reqFs = function()
 {
+	if(typeof global === 'undefined')
+		global = window;
 	if(typeof fs == 'undefined' || typeof path == 'undefined' || typeof ofs == 'undefined')
 		try{
 			fs = require('fs');
