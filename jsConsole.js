@@ -17,14 +17,14 @@ var reqFs = function()
 			for(i in global){
 				if(!i.startsWith('temp'))
 					continue;
-				if(typeof global[i][0] == 'object')
+				if(typeof global[i][1] == 'object')
 				{
-					if(typeof global[i][0].object.fs != 'undefined')
-						fs = global[i][0].object.fs;
-					if(typeof global[i][0].object.path != 'undefined')
-						path = global[i][0].object.path;
-					if(typeof global[i][0].object.originalFs != 'undefined')
-						ofs = global[i][0].object.originalFs;
+					if(typeof global[i][1].object.fs != 'undefined')
+						fs = global[i][1].object.fs;
+					if(typeof global[i][1].object.path != 'undefined')
+						path = global[i][1].object.path;
+					if(typeof global[i][1].object.originalFs != 'undefined')
+						ofs = global[i][1].object.originalFs;
 				}
 			}
 		}
