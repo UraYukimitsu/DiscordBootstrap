@@ -8,14 +8,11 @@ From your Discord client, open the JS console (Ctrl+Shift+I - or Cmd+Shift+I on 
 `Console` tab. You'll be met with a warning telling you that you have a 110% chance I'm scamming you. Here, paste the
 contents of `jsConsole.js` and press Enter.
 
-### An additional step may be required depending on your version of Discord - instructions will appear on-screen if needed.
-### Make sure your JS console is logging *ALL* messages if that additional step is required.
-
 After that, you can load CSS and JS into your Discord client easily with a command like
-`BD({css: '/absolute/path/to/theme.css', js:'/absolute/path/to/script.js', node:'/absolute/path/to/node_modules'})`
+`BD('/absolute/path/to/theme.css', '/absolute/path/to/script.js',)`
 
-All the arguments are optional.
 Of course, if you're using Windows don't forget to escape every backslash in your paths (`\\`).
 
-And you can revert any change made to your Discord client with
-`BD({revert: true})`
+At this point, a file selection dialog box will open. Please paste the contents of your clipboard in the file name text box and press enter. If you are prompted to replace (or overwrite) the file, select "Yes".
+
+Once your theme is installed, if you want to revert to the vanilla version of Discord, open the dev tools console and type `theme.uninstall()`
